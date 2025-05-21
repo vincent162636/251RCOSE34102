@@ -25,10 +25,9 @@ int proc_count = 0;
 void FCFS() {
     Process ready[MAX_PROCESSES];
     for (int i = 0; i < proc_count; i++) {
-        ready[i] = new[i]; // Copy from global 'new' to local 'ready'
+        ready[i] = new[i];
     }
 
-    // Bubble sort 'ready' array by arrival time
     for (int i = 0; i < proc_count - 1; i++) {
         for (int j = 0; j < proc_count - i - 1; j++) {
             if (ready[j].arrival > ready[j+1].arrival) {
@@ -56,10 +55,9 @@ void FCFS() {
 void SJF(void) {
     Process ready[MAX_PROCESSES];
     for (int i = 0; i < proc_count; i++) {
-        ready[i] = new[i]; // Copy from global 'new' to local 'ready'
+        ready[i] = new[i];
     }
 
-    // Bubble sort 'ready' array by arrival time
     for (int i = 0; i < proc_count - 1; i++) {
         for (int j = 0; j < proc_count - i - 1; j++) {
             if (ready[j].arrival > ready[j+1].arrival) {
@@ -120,10 +118,9 @@ void SJF(void) {
 void Priority(void) {
     Process ready[MAX_PROCESSES];
     for (int i = 0; i < proc_count; i++) {
-        ready[i] = new[i]; // Copy from global 'new' to local 'ready'
+        ready[i] = new[i];
     }
 
-    // Bubble sort 'ready' array by arrival time
     for (int i = 0; i < proc_count - 1; i++) {
         for (int j = 0; j < proc_count - i - 1; j++) {
             if (ready[j].arrival > ready[j+1].arrival) {
@@ -242,12 +239,131 @@ void RR(void) {
 }
 
 void PSJF(void) {
+    Process ready[MAX_PROCESSES];
+    for (int i = 0; i < proc_count; i++) {
+        ready[i] = new[i];
+    }
 
+    for (int i = 0; i < proc_count - 1; i++) {
+        for (int j = 0; j < proc_count - i - 1; j++) {
+            if (ready[j].arrival > ready[j+1].arrival) {
+                Process temp = ready[j];
+                ready[j] = ready[j+1];
+                ready[j+1] = temp;
+            }
+        }
+    }
+
+    int time      = ready[0].arrival;
+    int completed = 0;
+
+    while (completed < proc_count) {
+
+        Process arrived[MAX_PROCESSES];
+        int arrived_cnt = 0;
+
+        for (int i = 0; i < proc_count; i++)
+            if (time >= ready[i].arrival && ready[i].completed == 0)
+                arrived[arrived_cnt++] = ready[i];
+
+        if (arrived_cnt == 0) {
+            time++;
+            continue;
+        }
+
+        int sel = 0;
+        for (int i = 1; i < arrived_cnt; i++)
+            if (arrived[i].burst_copy < arrived[sel].burst_copy)
+                sel = i;
+
+        for (int i = 0; i < proc_count; i++)
+            if (ready[i].PID == arrived[sel].PID) {
+
+                ready[i].burst_copy--;
+                time++;
+
+                if (ready[i].burst_copy == 0) {
+                    ready[i].finish     = time;
+                    ready[i].turnaround = ready[i].finish - ready[i].arrival;
+                    ready[i].waiting    = ready[i].turnaround - ready[i].burst;
+                    ready[i].completed  = 1;
+                    completed++;
+                }
+                break;
+            }
+    }
+
+    for (int i = 0; i < proc_count; i++) {
+        printf("%d %d %d\n",
+         ready[i].finish,
+         ready[i].turnaround,
+         ready[i].waiting);
+    }
+        
 }
 
 
 void PPriority(void) {
+    Process ready[MAX_PROCESSES];
+    for (int i = 0; i < proc_count; i++) {
+        ready[i] = new[i];
+    }
 
+    for (int i = 0; i < proc_count - 1; i++) {
+        for (int j = 0; j < proc_count - i - 1; j++) {
+            if (ready[j].arrival > ready[j+1].arrival) {
+                Process temp = ready[j];
+                ready[j] = ready[j+1];
+                ready[j+1] = temp;
+            }
+        }
+    }
+
+    int time      = ready[0].arrival;
+    int completed = 0;
+
+    while (completed < proc_count) {
+
+        Process arrived[MAX_PROCESSES];
+        int arrived_cnt = 0;
+
+        for (int i = 0; i < proc_count; i++)
+            if (time >= ready[i].arrival && ready[i].completed == 0)
+                arrived[arrived_cnt++] = ready[i];
+
+        if (arrived_cnt == 0) {
+            time++;
+            continue;
+        }
+
+        int sel = 0;
+        for (int i = 1; i < arrived_cnt; i++)
+            if (arrived[i].priority < arrived[sel].priority)
+                sel = i;
+
+        for (int i = 0; i < proc_count; i++)
+            if (ready[i].PID == arrived[sel].PID) {
+
+                ready[i].burst_copy--;
+                time++;
+
+                if (ready[i].burst_copy == 0) {
+                    ready[i].finish     = time;
+                    ready[i].turnaround = ready[i].finish - ready[i].arrival;
+                    ready[i].waiting    = ready[i].turnaround - ready[i].burst;
+                    ready[i].completed  = 1;
+                    completed++;
+                }
+                break;
+            }
+    }
+
+    for (int i = 0; i < proc_count; i++) {
+        printf("%d %d %d\n",
+         ready[i].finish,
+         ready[i].turnaround,
+         ready[i].waiting);
+    }
 }
 
 
@@ -286,17 +402,27 @@ void Schedule(void) {
     else if (answer == 2) SJF();
     else if (answer == 3) Priority();
     else if (answer == 4) RR();
-    /*
     else if (answer == 5) PSJF();
-    else PPriority();
-    */
+    else if (answer == 6) PPriority();
 }
 
 int main() {
-    Create_Process();
-    Create_Process();
-    Create_Process();
-    Create_Process();
+    printf("Create Process\n");
+    int num = 1;
+    while (num == 1) {
+        Create_Process();
+        printf("1) Keep adding process\n");
+        printf("2) Choose algorithm\n");
+        scanf("%d", &num);
+    }
     Schedule();
     return 0;
 }
+
+/*
+What's left?
+
+1. Gantt Chart Printing
+2. Random IO bursts
+3. Printing summary.
+*/

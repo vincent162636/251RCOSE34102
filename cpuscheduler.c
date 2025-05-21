@@ -208,13 +208,13 @@ void RR(void) {
     int time = 0;
     int completed = 0;
     int num = 0;
-    int process_ran_in_this_sweep = 0; // Flag to track if any process ran in a full sweep
+    int flag = 0;
 
     while(1) {
         if (ready[num].arrival <= time && ready[num].completed == 0) {
-            process_ran_in_this_sweep = 1; // Mark that a process will run in this sweep
+            flag = 1;
 
-            if (time_q < ready[num].burst_copy) { // If quantum is less than remaining burst (preempt)
+            if (time_q < ready[num].burst_copy) {
                 time += time_q;
                 ready[num].burst_copy -= time_q;
             } 
@@ -232,37 +232,29 @@ void RR(void) {
 
         num++;
         if (num >= proc_count) {
-            if (process_ran_in_this_sweep == 0 && completed < proc_count) {
-                time++; // CPU was idle for a full sweep, and processes are pending
+            if (flag == 0 && completed < proc_count) {
+                time++;
             }
             num = 0;
-            process_ran_in_this_sweep = 0; // Reset for the next sweep
+            flag = 0;
         }
     }
 
     for (int i = 0; i < proc_count; i++) {
             printf("%d %d %d\n", ready[i].finish, ready[i].turnaround, ready[i].waiting);
         }
-
-    /*
-    RR algorithm
-    compare rr quantum vs burst
-    -> quant smaller -> time += quant, burst -= quant -> move on to next ready 
-    -> burst smaller -> time += burst, finish = time, completed = 1 -> move on to next ready
-    do this until every process are completed.
-    */
+        
 }
-
-/*
 
 void PSJF(void) {
 
 }
 
+
 void PPriority(void) {
 
 }
-*/
+
 
 void Create_Process(void) {
     if (proc_count == MAX_PROCESSES) {

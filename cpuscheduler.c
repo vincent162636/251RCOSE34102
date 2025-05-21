@@ -9,6 +9,7 @@ typedef struct {
     int PID;
     int arrival;
     int burst;
+    int burst_copy; // for RR
     int ioburst;
     //io request and count = random
     int priority;
@@ -184,12 +185,75 @@ void Priority(void) {
     
 }
 
-/*
-
-
 void RR(void) {
+    int time_q = 0;
+    printf("Time Quantum: ");
+    scanf("%d", &time_q);
 
+    Process ready[MAX_PROCESSES];
+    for (int i = 0; i < proc_count; i++) {
+        ready[i] = new[i];
+    }
+
+    for (int i = 0; i < proc_count - 1; i++) {
+        for (int j = 0; j < proc_count - i - 1; j++) {
+            if (ready[j].arrival > ready[j+1].arrival) {
+                Process temp = ready[j];
+                ready[j] = ready[j+1];
+                ready[j+1] = temp;
+            }
+        }
+    }
+
+    int time = 0;
+    int completed = 0;
+    int num = 0;
+    int process_ran_in_this_sweep = 0; // Flag to track if any process ran in a full sweep
+
+    while(1) {
+        if (ready[num].arrival <= time && ready[num].completed == 0) {
+            process_ran_in_this_sweep = 1; // Mark that a process will run in this sweep
+
+            if (time_q < ready[num].burst_copy) { // If quantum is less than remaining burst (preempt)
+                time += time_q;
+                ready[num].burst_copy -= time_q;
+            } 
+            else {
+                time += ready[num].burst_copy;
+                ready[num].finish = time;
+                ready[num].turnaround = ready[num].finish - ready[num].arrival;
+                ready[num].waiting = ready[num].turnaround - ready[num].burst;
+                ready[num].completed = 1;
+                completed++;
+            }
+        }
+
+        if (completed == proc_count) break;
+
+        num++;
+        if (num >= proc_count) {
+            if (process_ran_in_this_sweep == 0 && completed < proc_count) {
+                time++; // CPU was idle for a full sweep, and processes are pending
+            }
+            num = 0;
+            process_ran_in_this_sweep = 0; // Reset for the next sweep
+        }
+    }
+
+    for (int i = 0; i < proc_count; i++) {
+            printf("%d %d %d\n", ready[i].finish, ready[i].turnaround, ready[i].waiting);
+        }
+
+    /*
+    RR algorithm
+    compare rr quantum vs burst
+    -> quant smaller -> time += quant, burst -= quant -> move on to next ready 
+    -> burst smaller -> time += burst, finish = time, completed = 1 -> move on to next ready
+    do this until every process are completed.
+    */
 }
+
+/*
 
 void PSJF(void) {
 
@@ -211,6 +275,7 @@ void Create_Process(void) {
     scanf("%d", &new[proc_count].arrival);
     printf("CPU Burst Time: ");
     scanf("%d", &new[proc_count].burst);
+    new[proc_count].burst_copy = new[proc_count].burst;
     printf("I/O Burst Time: ");
     scanf("%d", &new[proc_count].ioburst);
     printf("Priority: ");
@@ -233,9 +298,8 @@ void Schedule(void) {
     if (answer == 1) FCFS();
     else if (answer == 2) SJF();
     else if (answer == 3) Priority();
-    /*
-    else if (answer == 3) Priority();
     else if (answer == 4) RR();
+    /*
     else if (answer == 5) PSJF();
     else PPriority();
     */

@@ -71,15 +71,12 @@ void SJF(void) {
     }
     
     int time = ready[0].arrival;
-    ready[0].finish = time + ready[0].burst;
-    ready[0].turnaround = ready[0].finish - ready[0].arrival;
-    ready[0].waiting = ready[0].turnaround - ready[0].burst;
-    time = ready[0].finish;
-    ready[0].completed = 1;
+    int completed = 0;
 
-    for (int j = 0; j < proc_count - 1; j++) {
+    while (completed < proc_count) {
         Process arrived[MAX_PROCESSES];
         int arrived_count = 0;
+
         for (int i = 0; i < proc_count; i++) {
             if (time >= ready[i].arrival && ready[i].completed == 0) {
                 arrived[arrived_count] = ready[i];
@@ -87,19 +84,19 @@ void SJF(void) {
             }
         }
 
-        int arrived_min = 0;
-
         if (arrived_count == 0) {
-            break; // All processes might be completed or no new ones arrived
+            time++;
+            continue;
         }
 
-        if (arrived_count > 1) {
-            for (int i = 1; i < arrived_count; i++) {
-                if (arrived[i].burst < arrived[arrived_min].burst){
-                    arrived_min = i;
-                }
+        int arrived_min = 0;
+        
+        for (int i = 1; i < arrived_count; i++) {
+            if (arrived[i].burst < arrived[arrived_min].burst){
+                arrived_min = i;
             }
-        }
+        }    
+        
         
         for (int i = 0; i < proc_count; i++) {
             if (ready[i].PID == arrived[arrived_min].PID) {
@@ -108,6 +105,7 @@ void SJF(void) {
                 ready[i].waiting = ready[i].turnaround - ready[i].burst;
                 time = ready[i].finish;
                 ready[i].completed = 1;
+                completed++;
                 break;
             }
         }
@@ -115,17 +113,17 @@ void SJF(void) {
 
     for (int i = 0; i < proc_count; i++) {
             printf("%d %d %d\n", ready[i].finish, ready[i].turnaround, ready[i].waiting);
-        }
+    }
     
-    //Problem: if no one is in arrival at first try, it just gives up. Actually, we need to time++ and retry until all processes are done.
 }
 
 void Priority(void) {
     Process ready[MAX_PROCESSES];
     for (int i = 0; i < proc_count; i++) {
-        ready[i] = new[i];
+        ready[i] = new[i]; // Copy from global 'new' to local 'ready'
     }
 
+    // Bubble sort 'ready' array by arrival time
     for (int i = 0; i < proc_count - 1; i++) {
         for (int j = 0; j < proc_count - i - 1; j++) {
             if (ready[j].arrival > ready[j+1].arrival) {
@@ -135,17 +133,14 @@ void Priority(void) {
             }
         }
     }
-
-    int time = ready[0].arrival;
-    ready[0].finish = time + ready[0].burst;
-    ready[0].turnaround = ready[0].finish - ready[0].arrival;
-    ready[0].waiting = ready[0].turnaround - ready[0].burst;
-    time = ready[0].finish;
-    ready[0].completed = 1;
     
-    for (int j = 0; j < proc_count - 1; j++) {
+    int time = ready[0].arrival;
+    int completed = 0;
+
+    while (completed < proc_count) {
         Process arrived[MAX_PROCESSES];
         int arrived_count = 0;
+
         for (int i = 0; i < proc_count; i++) {
             if (time >= ready[i].arrival && ready[i].completed == 0) {
                 arrived[arrived_count] = ready[i];
@@ -153,19 +148,19 @@ void Priority(void) {
             }
         }
 
-        int arrived_min = 0;
-
         if (arrived_count == 0) {
-            break;
+            time++;
+            continue;
         }
 
-        if (arrived_count > 1) {
-            for (int i = 1; i < arrived_count; i++) {
-                if (arrived[i].priority < arrived[arrived_min].priority){
-                    arrived_min = i;
-                }
+        int arrived_min = 0;
+        
+        for (int i = 1; i < arrived_count; i++) {
+            if (arrived[i].priority < arrived[arrived_min].priority){
+                arrived_min = i;
             }
-        }
+        }    
+        
         
         for (int i = 0; i < proc_count; i++) {
             if (ready[i].PID == arrived[arrived_min].PID) {
@@ -174,6 +169,7 @@ void Priority(void) {
                 ready[i].waiting = ready[i].turnaround - ready[i].burst;
                 time = ready[i].finish;
                 ready[i].completed = 1;
+                completed++;
                 break;
             }
         }
@@ -181,8 +177,7 @@ void Priority(void) {
 
     for (int i = 0; i < proc_count; i++) {
             printf("%d %d %d\n", ready[i].finish, ready[i].turnaround, ready[i].waiting);
-        }
-    
+    }
 }
 
 void RR(void) {
@@ -298,6 +293,7 @@ void Schedule(void) {
 }
 
 int main() {
+    Create_Process();
     Create_Process();
     Create_Process();
     Create_Process();

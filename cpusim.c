@@ -22,7 +22,10 @@ typedef struct {
 Process new[MAX_PROCESSES];
 int proc_count = 0;
 
-void FCFS() {
+int gantt_pid[MAX_TIME];
+int gantt_len = 0;
+
+int FCFS(int gantt_pid[]) {
     Process ready[MAX_PROCESSES];
     for (int i = 0; i < proc_count; i++) {
         ready[i] = new[i];
@@ -41,7 +44,6 @@ void FCFS() {
     int time = 0;
     int i = 0;
     int how_much = 0;
-    int gantt_pid[MAX_TIME];
 
     while (1) {
         if (ready[i].arrival <= time && ready[i].execution == 0) {
@@ -61,12 +63,10 @@ void FCFS() {
         time++;
     }
 
-    for (int i = 0; i < time + 1; i++) {
-        printf("%d", gantt_pid[i]);
-    }
+    return time + 1;
 }
 
-void SJF() {
+int SJF(int gantt_pid[]) {
     Process ready[MAX_PROCESSES];
     for (int i = 0; i < proc_count; i++) {
         ready[i] = new[i];
@@ -87,7 +87,6 @@ void SJF() {
     int how_much = 0;
     int process_to_run = proc_count + 1;
     int min_burst = MAX_TIME;
-    int gantt_pid[MAX_TIME];
 
     while (1) {
         if (process_to_run == proc_count + 1) {
@@ -123,12 +122,10 @@ void SJF() {
         time++;
     }
 
-    for (int i = 0; i < time + 1; i++) {
-        printf("%d", gantt_pid[i]);
-    }
+    return time + 1;
 }
 
-void Priority() {
+int Priority(int gantt_pid[]) {
     Process ready[MAX_PROCESSES];
     for (int i = 0; i < proc_count; i++) {
         ready[i] = new[i];
@@ -149,7 +146,6 @@ void Priority() {
     int how_much = 0;
     int process_to_run = proc_count + 1;
     int min_priority = MAX_TIME;
-    int gantt_pid[MAX_TIME];
 
     while (1) {
         if (process_to_run == proc_count + 1) {
@@ -185,12 +181,10 @@ void Priority() {
         time++;
     }
 
-    for (int i = 0; i < time + 1; i++) {
-        printf("%d", gantt_pid[i]);
-    }
+    return time + 1;
 }
 
-void RR() {
+int RR(int gantt_pid[]) {
     int time_q = 0;
     printf("Time Quantum: ");
     scanf("%d", &time_q);
@@ -212,7 +206,6 @@ void RR() {
 
     int time = 0;
     int how_much = 0;
-    int gantt_pid[MAX_TIME];
     
     Process ready[MAX_PROCESSES];
     int ready_front = 0;
@@ -279,12 +272,10 @@ void RR() {
         time++;
     }
 
-    for (int i = 0; i < time + 1; i++) {
-        printf("%d", gantt_pid[i]);
-    }
+    return time + 1;
 }
 
-void PSJF() {
+int PSJF(int gantt_pid[]) {
     Process ready[MAX_PROCESSES];
     for (int i = 0; i < proc_count; i++) {
         ready[i] = new[i];
@@ -302,7 +293,6 @@ void PSJF() {
 
     int time = 0;
     int how_much = 0;
-    int gantt_pid[MAX_TIME];
 
     while (1) {
         int process_to_run = proc_count + 1;
@@ -336,12 +326,10 @@ void PSJF() {
         time++;
     }
 
-    for (int i = 0; i < time + 1; i++) {
-        printf("%d", gantt_pid[i]);
-    }
+    return time + 1;
 }
 
-void PPriority() {
+int PPriority(int gantt_pid[]) {
     Process ready[MAX_PROCESSES];
     for (int i = 0; i < proc_count; i++) {
         ready[i] = new[i];
@@ -359,7 +347,6 @@ void PPriority() {
 
     int time = 0;
     int how_much = 0;
-    int gantt_pid[MAX_TIME];
 
     while (1) {
         int process_to_run = proc_count + 1;
@@ -393,9 +380,22 @@ void PPriority() {
         time++;
     }
 
-    for (int i = 0; i < time + 1; i++) {
-        printf("%d", gantt_pid[i]);
+    return time + 1;
+}
+
+void print_gantt_chart(int gantt_pid[], int gantt_len) {
+    int track = gantt_pid[0];
+    int time = 0;
+    for (int i = 1; i < gantt_len; i++) {
+        if (gantt_pid[i] != track) {
+            if (track == 0) printf("%d -Idle- ", time);
+            else printf("%d -P%d- ", time, track);
+            time = i;
+            track = gantt_pid[i];
+        }
     }
+    printf("%d -P%d- %d", time, track, gantt_len);
+    printf("\n");
 }
 
 void Create_Process(void) {
@@ -429,12 +429,14 @@ void Schedule(void) {
     int answer = 0;
     scanf("%d", &answer);
 
-    if (answer == 1) FCFS();
-    else if (answer == 2) SJF();
-    else if (answer == 3) Priority();
-    else if (answer == 4) RR();
-    else if (answer == 5) PSJF();
-    else if (answer == 6) PPriority();
+    if (answer == 1) gantt_len = FCFS(gantt_pid);
+    else if (answer == 2) gantt_len = SJF(gantt_pid);
+    else if (answer == 3) gantt_len = Priority(gantt_pid);
+    else if (answer == 4) gantt_len = RR(gantt_pid);
+    else if (answer == 5) gantt_len = PSJF(gantt_pid);
+    else if (answer == 6) gantt_len = PPriority(gantt_pid);
+
+    print_gantt_chart(gantt_pid, gantt_len);
 }
 
 int main() {
@@ -450,3 +452,16 @@ int main() {
     Schedule();
     return 0;
 }
+
+/*
+What's left?
+
+1. Gantt Chart Printing
+-> make a gantt tracker queue for every algorithm, and integrate it into the algorithm - done
+-> make a gantt chart printer function, and get the queue from the algorithms to print the gantt chart. -> done
+2. Random IO bursts
+-> add a random io burst in gantt queue by integrating it into gantt chart printer function. 
+-> so gantt chart printer function should get IO burst values and gantt tracker queue values to print the gantt chart.
+3. Printing summary.
+-> make a summary printer function, and get the queue from the algorithms to print the summary. -> I think I should integrate it into cantt chart printing.
+*/

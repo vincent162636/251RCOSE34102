@@ -74,7 +74,6 @@ int FCFS(int gantt_pid[], Summary summary[]) {
 
     for (int j = 0; j < proc_count; j++) {
         summary[j].PID        = ready[j].PID;
-        summary[j].finish     = ready[j].finish;
         summary[j].turnaround = ready[j].turnaround;
         summary[j].waiting    = ready[j].waiting;
     }
@@ -140,7 +139,6 @@ int SJF(int gantt_pid[], Summary summary[]) {
 
     for (int j = 0; j < proc_count; j++) {
         summary[j].PID        = ready[j].PID;
-        summary[j].finish     = ready[j].finish;
         summary[j].turnaround = ready[j].turnaround;
         summary[j].waiting    = ready[j].waiting;
     }
@@ -206,7 +204,6 @@ int Priority(int gantt_pid[], Summary summary[]) {
 
     for (int j = 0; j < proc_count; j++) {
         summary[j].PID        = ready[j].PID;
-        summary[j].finish     = ready[j].finish;
         summary[j].turnaround = ready[j].turnaround;
         summary[j].waiting    = ready[j].waiting;
     }
@@ -219,17 +216,17 @@ int RR(int gantt_pid[], Summary summary[]) {
     printf("Time Quantum: ");
     scanf("%d", &time_q);
 
-    Process waiting[MAX_PROCESSES];
+    Process ready[MAX_PROCESSES];
     for (int i = 0; i < proc_count; i++) {
-        waiting[i] = new[i];
+        ready[i] = new[i];
     }
 
     for (int i = 0; i < proc_count - 1; i++) {
         for (int j = 0; j < proc_count - i - 1; j++) {
-            if (waiting[j].arrival > waiting[j+1].arrival) {
-                Process temp = waiting[j];
-                waiting[j] = waiting[j+1];
-                waiting[j+1] = temp;
+            if (ready[j].arrival > ready[j+1].arrival) {
+                Process temp = ready[j];
+                ready[j] = ready[j+1];
+                ready[j+1] = temp;
             }
         }
     }
@@ -237,10 +234,10 @@ int RR(int gantt_pid[], Summary summary[]) {
     int time = 0;
     int how_much = 0;
     
-    Process ready[MAX_PROCESSES];
-    int ready_front = 0;
-    int ready_rear = 0;
-    int ready_size = 0;
+    Process rr_queue[MAX_PROCESSES];
+    int front = 0;
+    int rear = 0;
+    int size = 0;
     
     int current_process = -1;
     int time_q_track = 0;
@@ -250,39 +247,39 @@ int RR(int gantt_pid[], Summary summary[]) {
 
     while (1) {
         for (int j = 0; j < proc_count; j++) {
-            if (waiting[j].arrival == time && waiting[j].execution == 0) {
-                ready[ready_rear] = waiting[j];
-                ready_rear = (ready_rear + 1) % MAX_PROCESSES;
-                ready_size++;
-                waiting[j].execution = 1;
+            if (ready[j].arrival == time && ready[j].execution == 0) {
+                rr_queue[rear] = ready[j];
+                rear = (rear + 1) % MAX_PROCESSES;
+                size++;
+                ready[j].execution = 1;
             }
         }
 
         if (requeue == 1) {
-            ready[ready_rear] = requeue_process;
-            ready_rear = (ready_rear + 1) % MAX_PROCESSES;
-            ready_size++;
+            rr_queue[rear] = requeue_process;
+            rear = (rear + 1) % MAX_PROCESSES;
+            size++;
             requeue = 0;
         }
 
-        if (current_process == -1 && ready_size > 0) {
-            current_process = ready_front;
-            ready_front = (ready_front + 1) % MAX_PROCESSES;
-            ready_size--;
+        if (current_process == -1 && size > 0) {
+            current_process = front;
+            front = (front + 1) % MAX_PROCESSES;
+            size--;
             time_q_track = 0;
         }
 
         if (current_process != -1) {
-            gantt_pid[time] = ready[current_process].PID;
-            ready[current_process].burst_copy--;
+            gantt_pid[time] = rr_queue[current_process].PID;
+            rr_queue[current_process].burst_copy--;
             time_q_track++;
             
-            if (ready[current_process].burst_copy == 0) {
+            if (rr_queue[current_process].burst_copy == 0) {
                 for (int k = 0; k < proc_count; k++)
-                    if (waiting[k].PID == ready[current_process].PID) {
-                        waiting[k].finish     = time + 1;
-                        waiting[k].turnaround = waiting[k].finish - waiting[k].arrival;
-                        waiting[k].waiting    = waiting[k].turnaround - waiting[k].burst;
+                    if (ready[k].PID == rr_queue[current_process].PID) {
+                        ready[k].finish     = time + 1;
+                        ready[k].turnaround = ready[k].finish - ready[k].arrival;
+                        ready[k].waiting    = ready[k].turnaround - ready[k].burst;
                         break;
                     }
                 how_much++;
@@ -290,7 +287,7 @@ int RR(int gantt_pid[], Summary summary[]) {
             }
             else if (time_q_track == time_q) {
                 requeue = 1;
-                requeue_process = ready[current_process];
+                requeue_process = rr_queue[current_process];
                 current_process = -1;
             }
         } 
@@ -303,10 +300,9 @@ int RR(int gantt_pid[], Summary summary[]) {
     }
 
     for (int j = 0; j < proc_count; j++) {
-        summary[j].PID        = waiting[j].PID;
-        summary[j].finish     = waiting[j].finish;
-        summary[j].turnaround = waiting[j].turnaround;
-        summary[j].waiting    = waiting[j].waiting;
+        summary[j].PID        = ready[j].PID;
+        summary[j].turnaround = ready[j].turnaround;
+        summary[j].waiting    = ready[j].waiting;
     }
 
     return time + 1;
@@ -365,7 +361,6 @@ int PSJF(int gantt_pid[], Summary summary[]) {
 
     for (int j = 0; j < proc_count; j++) {
         summary[j].PID        = ready[j].PID;
-        summary[j].finish     = ready[j].finish;
         summary[j].turnaround = ready[j].turnaround;
         summary[j].waiting    = ready[j].waiting;
     }
@@ -426,7 +421,6 @@ int PPriority(int gantt_pid[], Summary summary[]) {
 
     for (int j = 0; j < proc_count; j++) {
         summary[j].PID        = ready[j].PID;
-        summary[j].finish     = ready[j].finish;
         summary[j].turnaround = ready[j].turnaround;
         summary[j].waiting    = ready[j].waiting;
     }

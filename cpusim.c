@@ -484,8 +484,6 @@ void Create_Process(void) {
     printf("CPU Burst Time: ");
     scanf("%d", &new[proc_count].burst);
     new[proc_count].burst_copy = new[proc_count].burst;
-    printf("I/O Burst Time: ");
-    scanf("%d", &new[proc_count].ioburst);
     printf("Priority: ");
     scanf("%d", &new[proc_count].priority);
     new[proc_count].execution = 0;
@@ -493,12 +491,12 @@ void Create_Process(void) {
 }
 
 void Schedule(void) {
-    gantt_len[0] = FCFS(gantt_pid[0], result[0]); reset_state();
-    gantt_len[1] = SJF(gantt_pid[1], result[1]); reset_state();
-    gantt_len[2] = Priority(gantt_pid[2], result[2]); reset_state();
-    gantt_len[3] = RR(gantt_pid[3], result[3]); reset_state();
-    gantt_len[4] = PSJF(gantt_pid[4], result[4]); reset_state();
-    gantt_len[5] = PPriority(gantt_pid[5], result[5]); reset_state();
+    gantt_len[0] = FCFS(gantt_pid[0], result[0]);
+    gantt_len[1] = SJF(gantt_pid[1], result[1]);
+    gantt_len[2] = Priority(gantt_pid[2], result[2]);
+    gantt_len[3] = RR(gantt_pid[3], result[3]);
+    gantt_len[4] = PSJF(gantt_pid[4], result[4]);
+    gantt_len[5] = PPriority(gantt_pid[5], result[5]); 
 
     for (int i = 0; i < 6; i++) {
         if (i == 0) printf("FCFS\t");

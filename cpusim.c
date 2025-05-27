@@ -19,13 +19,22 @@ typedef struct {
     int execution;
 } Process;
 
+typedef struct {
+    int PID;
+    int finish;
+    int waiting;
+    int turnaround;
+} Summary;
+
 Process new[MAX_PROCESSES];
 int proc_count = 0;
+Summary result[6][MAX_PROCESSES];
 
-int gantt_pid[MAX_TIME];
-int gantt_len = 0;
+int gantt_pid[6][MAX_TIME];
+int gantt_len[6] = {0, 0, 0, 0, 0, 0};
 
-int FCFS(int gantt_pid[]) {
+
+int FCFS(int gantt_pid[], Summary summary[]) {
     Process ready[MAX_PROCESSES];
     for (int i = 0; i < proc_count; i++) {
         ready[i] = new[i];
@@ -51,7 +60,7 @@ int FCFS(int gantt_pid[]) {
             gantt_pid[time] = ready[i].PID;
             if (ready[i].burst_copy == 0) {
                 ready[i].execution = 1;
-                ready[i].finish = time + ready[i].burst;
+                ready[i].finish = time + 1;
                 ready[i].turnaround = ready[i].finish - ready[i].arrival;
                 ready[i].waiting = ready[i].turnaround - ready[i].burst;
                 how_much++;
@@ -63,10 +72,17 @@ int FCFS(int gantt_pid[]) {
         time++;
     }
 
+    for (int j = 0; j < proc_count; j++) {
+        summary[j].PID        = ready[j].PID;
+        summary[j].finish     = ready[j].finish;
+        summary[j].turnaround = ready[j].turnaround;
+        summary[j].waiting    = ready[j].waiting;
+    }
+
     return time + 1;
 }
 
-int SJF(int gantt_pid[]) {
+int SJF(int gantt_pid[], Summary summary[]) {
     Process ready[MAX_PROCESSES];
     for (int i = 0; i < proc_count; i++) {
         ready[i] = new[i];
@@ -106,7 +122,7 @@ int SJF(int gantt_pid[]) {
             gantt_pid[time] = ready[process_to_run].PID;
             if (ready[process_to_run].burst_copy == 0) {
                 ready[process_to_run].execution = 1;
-                ready[process_to_run].finish = time + ready[process_to_run].burst;
+                ready[process_to_run].finish = time + 1;
                 ready[process_to_run].turnaround = ready[process_to_run].finish - ready[process_to_run].arrival;
                 ready[process_to_run].waiting = ready[process_to_run].turnaround - ready[process_to_run].burst;
                 how_much++;
@@ -122,10 +138,17 @@ int SJF(int gantt_pid[]) {
         time++;
     }
 
+    for (int j = 0; j < proc_count; j++) {
+        summary[j].PID        = ready[j].PID;
+        summary[j].finish     = ready[j].finish;
+        summary[j].turnaround = ready[j].turnaround;
+        summary[j].waiting    = ready[j].waiting;
+    }
+
     return time + 1;
 }
 
-int Priority(int gantt_pid[]) {
+int Priority(int gantt_pid[], Summary summary[]) {
     Process ready[MAX_PROCESSES];
     for (int i = 0; i < proc_count; i++) {
         ready[i] = new[i];
@@ -165,7 +188,7 @@ int Priority(int gantt_pid[]) {
             gantt_pid[time] = ready[process_to_run].PID;
             if (ready[process_to_run].burst_copy == 0) {
                 ready[process_to_run].execution = 1;
-                ready[process_to_run].finish = time + ready[process_to_run].burst;
+                ready[process_to_run].finish = time + 1;
                 ready[process_to_run].turnaround = ready[process_to_run].finish - ready[process_to_run].arrival;
                 ready[process_to_run].waiting = ready[process_to_run].turnaround - ready[process_to_run].burst;
                 how_much++;
@@ -181,10 +204,17 @@ int Priority(int gantt_pid[]) {
         time++;
     }
 
+    for (int j = 0; j < proc_count; j++) {
+        summary[j].PID        = ready[j].PID;
+        summary[j].finish     = ready[j].finish;
+        summary[j].turnaround = ready[j].turnaround;
+        summary[j].waiting    = ready[j].waiting;
+    }
+
     return time + 1;
 }
 
-int RR(int gantt_pid[]) {
+int RR(int gantt_pid[], Summary summary[]) {
     int time_q = 0;
     printf("Time Quantum: ");
     scanf("%d", &time_q);
@@ -272,10 +302,17 @@ int RR(int gantt_pid[]) {
         time++;
     }
 
+    for (int j = 0; j < proc_count; j++) {
+        summary[j].PID        = waiting[j].PID;
+        summary[j].finish     = waiting[j].finish;
+        summary[j].turnaround = waiting[j].turnaround;
+        summary[j].waiting    = waiting[j].waiting;
+    }
+
     return time + 1;
 }
 
-int PSJF(int gantt_pid[]) {
+int PSJF(int gantt_pid[], Summary summary[]) {
     Process ready[MAX_PROCESSES];
     for (int i = 0; i < proc_count; i++) {
         ready[i] = new[i];
@@ -312,7 +349,7 @@ int PSJF(int gantt_pid[]) {
             ready[process_to_run].burst_copy--;
             if (ready[process_to_run].burst_copy == 0) {
                 ready[process_to_run].execution = 1;
-                ready[process_to_run].finish = time + ready[process_to_run].burst;
+                ready[process_to_run].finish = time + 1;
                 ready[process_to_run].turnaround = ready[process_to_run].finish - ready[process_to_run].arrival;
                 ready[process_to_run].waiting = ready[process_to_run].turnaround - ready[process_to_run].burst;
                 how_much++;
@@ -326,10 +363,17 @@ int PSJF(int gantt_pid[]) {
         time++;
     }
 
+    for (int j = 0; j < proc_count; j++) {
+        summary[j].PID        = ready[j].PID;
+        summary[j].finish     = ready[j].finish;
+        summary[j].turnaround = ready[j].turnaround;
+        summary[j].waiting    = ready[j].waiting;
+    }
+
     return time + 1;
 }
 
-int PPriority(int gantt_pid[]) {
+int PPriority(int gantt_pid[], Summary summary[]) {
     Process ready[MAX_PROCESSES];
     for (int i = 0; i < proc_count; i++) {
         ready[i] = new[i];
@@ -366,7 +410,7 @@ int PPriority(int gantt_pid[]) {
             ready[process_to_run].burst_copy--;
             if (ready[process_to_run].burst_copy == 0) {
                 ready[process_to_run].execution = 1;
-                ready[process_to_run].finish = time + ready[process_to_run].burst;
+                ready[process_to_run].finish = time + 1;
                 ready[process_to_run].turnaround = ready[process_to_run].finish - ready[process_to_run].arrival;
                 ready[process_to_run].waiting = ready[process_to_run].turnaround - ready[process_to_run].burst;
                 how_much++;
@@ -380,7 +424,22 @@ int PPriority(int gantt_pid[]) {
         time++;
     }
 
+    for (int j = 0; j < proc_count; j++) {
+        summary[j].PID        = ready[j].PID;
+        summary[j].finish     = ready[j].finish;
+        summary[j].turnaround = ready[j].turnaround;
+        summary[j].waiting    = ready[j].waiting;
+    }
+
     return time + 1;
+}
+
+void reset_state(void)
+{
+    for (int p = 0; p < proc_count; ++p) {
+        new[p].burst_copy = new[p].burst;
+        new[p].execution  = 0;
+    }
 }
 
 void print_gantt_chart(int gantt_pid[], int gantt_len) {
@@ -396,6 +455,27 @@ void print_gantt_chart(int gantt_pid[], int gantt_len) {
     }
     printf("%d -P%d- %d", time, track, gantt_len);
     printf("\n");
+}
+
+void print_summary(Summary summary[6][MAX_PROCESSES]) {
+    printf("Algorithm\tTurnaround\tWaiting\n");
+    for (int i = 0; i < 6; i++) {
+        if (i == 0) printf("FCFS\t");
+        else if (i == 1) printf("SJF\t");
+        else if (i == 2) printf("Priority\t");
+        else if (i == 3) printf("RR\t");
+        else if (i == 4) printf("Preemptive SJF\t");
+        else if (i == 5) printf("Preemptive Priority\t");
+        float avg_turnaround = 0;
+        float avg_waiting = 0;
+        for (int j = 0; j < proc_count; j++) {
+            avg_turnaround += summary[i][j].turnaround;
+            avg_waiting += summary[i][j].waiting;
+        }
+        avg_turnaround /= proc_count;
+        avg_waiting /= proc_count;
+        printf("%.2f\t%.2f\t\n", avg_turnaround, avg_waiting);
+    }
 }
 
 void Create_Process(void) {
@@ -419,34 +499,34 @@ void Create_Process(void) {
 }
 
 void Schedule(void) {
-    printf("Select Algorithm: \n");
-    printf("1) FCFS\n");
-    printf("2) SJF\n");
-    printf("3) Priority\n");
-    printf("4) RR\n");
-    printf("5) Preemptive SJF\n");
-    printf("6) Preemptive Priority\n");
-    int answer = 0;
-    scanf("%d", &answer);
+    gantt_len[0] = FCFS(gantt_pid[0], result[0]); reset_state();
+    gantt_len[1] = SJF(gantt_pid[1], result[1]); reset_state();
+    gantt_len[2] = Priority(gantt_pid[2], result[2]); reset_state();
+    gantt_len[3] = RR(gantt_pid[3], result[3]); reset_state();
+    gantt_len[4] = PSJF(gantt_pid[4], result[4]); reset_state();
+    gantt_len[5] = PPriority(gantt_pid[5], result[5]); reset_state();
 
-    if (answer == 1) gantt_len = FCFS(gantt_pid);
-    else if (answer == 2) gantt_len = SJF(gantt_pid);
-    else if (answer == 3) gantt_len = Priority(gantt_pid);
-    else if (answer == 4) gantt_len = RR(gantt_pid);
-    else if (answer == 5) gantt_len = PSJF(gantt_pid);
-    else if (answer == 6) gantt_len = PPriority(gantt_pid);
+    for (int i = 0; i < 6; i++) {
+        if (i == 0) printf("FCFS\t");
+        else if (i == 1) printf("SJF\t");
+        else if (i == 2) printf("Priority\t");
+        else if (i == 3) printf("RR\t");
+        else if (i == 4) printf("Preemptive SJF\t");
+        else if (i == 5) printf("Preemptive Priority\t");
+        print_gantt_chart(gantt_pid[i], gantt_len[i]);
+    }
 
-    print_gantt_chart(gantt_pid, gantt_len);
+    print_summary(result);
 }
 
 int main() {
     printf("Create Process\n");
     int num = 1;
     while (num == 1) {
-        printf("PID 0 reserved for idle time");
+        printf("PID 0 reserved for idle time\n");
         Create_Process();
         printf("1) Keep adding process\n");
-        printf("2) Choose algorithm\n");
+        printf("2) Simulate algorithms\n");
         scanf("%d", &num);
     }
     Schedule();
@@ -463,5 +543,5 @@ What's left?
 -> add a random io burst in gantt queue by integrating it into gantt chart printer function. 
 -> so gantt chart printer function should get IO burst values and gantt tracker queue values to print the gantt chart.
 3. Printing summary.
--> make a summary printer function, and get the queue from the algorithms to print the summary. -> I think I should integrate it into cantt chart printing.
+-> done
 */
